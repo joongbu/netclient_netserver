@@ -19,7 +19,7 @@ unsigned int WINAPI fn1(void *p)
 		printf("echo : %s",recvbuf);
 		printf("\n");
 	}	return 0;
-}//socket rcv funtion 입력한 버퍼를 받는 thread
+}//socket rcv funtion thread
 
 
 void SetAddress(sockaddr_in *serverAddr, ADDRESS_FAMILY sin_family, int port, char *addr)

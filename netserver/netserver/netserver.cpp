@@ -18,9 +18,9 @@ unsigned int WINAPI fn1(void* p) {
 	printf("thread start!\n");
 	while(recv(Client, recvbuf, recvbuflen,0) > 0)
 	{
+			printf("%s\n",recvbuf);
 		if(echo == TRUE)
 		{
-			printf("%s\n", recvbuf);
 			if(send(Client, recvbuf, recvbuflen, 0) == SOCKET_ERROR)
 			{
 				printf("ERROR : the buffer back to the sender\n");
@@ -28,8 +28,8 @@ unsigned int WINAPI fn1(void* p) {
 				WSACleanup();
 				exit(0);
 			}
+			
 		}
-		
 	}
 }
 
@@ -39,7 +39,7 @@ void resetAddress(sockaddr_in *serverAddr, ADDRESS_FAMILY sin_family, int port, 
 	ZeroMemory(serverAddr, sizeof(*serverAddr));
 	serverAddr->sin_family = sin_family;
 	serverAddr->sin_port = htons(port); //chage network byte
-	serverAddr->sin_addr.s_addr = sin_addr;
+	serverAddr->sin_addr.s_addr = sin_addr; //
 }
 
 int main(int argc, char **argv)
@@ -104,7 +104,7 @@ while(1)
 {
 
 	while((Client = accept(Listen, NULL, NULL)) != INVALID_SOCKET)
-	{
+	{ 
 		printf("Connetcted\n");	
 		_beginthreadex(NULL,0, fn1,(void*)Client,0,NULL);
 	}	
