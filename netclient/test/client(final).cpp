@@ -8,6 +8,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 #include <process.h>
 #define BUFFER 1024
+CRITICAL_SECTION cs;
 
 unsigned int WINAPI fn1(void *p)
 {
@@ -16,9 +17,12 @@ unsigned int WINAPI fn1(void *p)
 	SOCKET ConnectSocket = (SOCKET)p;
 	if(recv(ConnectSocket, recvbuf, recvbuflen, 0) > 0)
 	{
+		EnterCriticalSection(&cs);
 		printf("echo : %s",recvbuf);
 		printf("\n");
-	}	return 0;
+	}	
+		LeaveCriticalSection(&cs);
+	return 0;
 }//socket rcv funtion thread
 
 
@@ -39,6 +43,7 @@ int main(int argc, char **argv)
 	int sendbuflen = BUFFER;
 	char *addr = 0;
 	int port= 0;
+	InitializeCriticalSection(&cs);
 	if(argc != 3) {
 			printf("syntax : netclient <ip> <port>\n");
 			printf("exam : netclient 127.0.0.1 9999\n");
@@ -75,7 +80,7 @@ int main(int argc, char **argv)
 	
 	while(1) 
 	{
-		_beginthreadex(NULL,0,fn1,(void*)ConnectSocket,0,NULL);	
+		_beginthreadex(NULL,0,fn1,(void*)ConnectSocket,0,NULL);
 		printf("please enter the message\n");
 		scanf_s("%s",sendbuf,sizeof(sendbuf));
 
@@ -93,7 +98,7 @@ int main(int argc, char **argv)
 		}
 	
 
-		
+		DeleteCriticalSection(&cs);
 	}
 	closesocket(ConnectSocket);
 	WSACleanup();

@@ -7,7 +7,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 #define BUFFER 1024
 bool echo = false;
-
+CRITICAL_SECTION cs;
 
 unsigned int WINAPI fn1(void* p) {
 	
@@ -16,9 +16,11 @@ unsigned int WINAPI fn1(void* p) {
 	int recvbuflen = BUFFER;
 	SOCKET Client = (SOCKET) p;
 	printf("thread start!\n");
+	
 	while(recv(Client, recvbuf, recvbuflen,0) > 0)
 	{
-			printf("%s\n",recvbuf);
+		EnterCriticalSection(&cs);
+		printf("%s\n",recvbuf);
 		if(echo == TRUE)
 		{
 			if(send(Client, recvbuf, recvbuflen, 0) == SOCKET_ERROR)
@@ -28,9 +30,11 @@ unsigned int WINAPI fn1(void* p) {
 				WSACleanup();
 				exit(0);
 			}
-			
+		
 		}
+		LeaveCriticalSection(&cs);
 	}
+	return 0;
 }
 
 
@@ -39,8 +43,9 @@ void resetAddress(sockaddr_in *serverAddr, ADDRESS_FAMILY sin_family, int port, 
 	ZeroMemory(serverAddr, sizeof(*serverAddr));
 	serverAddr->sin_family = sin_family;
 	serverAddr->sin_port = htons(port); //chage network byte
-	serverAddr->sin_addr.s_addr = sin_addr; //
+	serverAddr->sin_addr.s_addr = sin_addr;
 }
+
 
 int main(int argc, char **argv)
 {
@@ -51,6 +56,7 @@ int main(int argc, char **argv)
 	SOCKET Client = INVALID_SOCKET;
 	struct sockaddr_in serverAddr;
 	int port = 0;
+	InitializeCriticalSection(&cs);//criticalsection reset
 
 	if(!(argc <= 3 && argc >=2))
 	{
@@ -61,7 +67,7 @@ int main(int argc, char **argv)
 		{
 		    echo = true;
 		}
-	printf("Wellcome to Netserver!!\n");
+	printf("Hello Netserver!!\n");
 	port = atoi(argv[1]);
 
 	if(WSAStartup(MAKEWORD(2,2), &wsaData) != 0) //version
@@ -107,9 +113,10 @@ while(1)
 	{ 
 		printf("Connetcted\n");	
 		_beginthreadex(NULL,0, fn1,(void*)Client,0,NULL);
+
 	}	
 	
-		
+		DeleteCriticalSection(&cs);
 }
 
 closesocket(Listen);
