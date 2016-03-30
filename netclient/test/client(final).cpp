@@ -77,10 +77,9 @@ int main(int argc, char **argv)
 	}
 	
 	
-	
+	_beginthreadex(NULL,0,fn1,(void*)ConnectSocket,0,NULL);
 	while(1) 
 	{
-		_beginthreadex(NULL,0,fn1,(void*)ConnectSocket,0,NULL);
 		printf("please enter the message\n");
 		scanf_s("%s",sendbuf,sizeof(sendbuf));
 
@@ -98,10 +97,11 @@ int main(int argc, char **argv)
 		}
 	
 
-		DeleteCriticalSection(&cs);
+		
 	}
 	closesocket(ConnectSocket);
 	WSACleanup();
+	DeleteCriticalSection(&cs);
 	return 0;
 
 }
